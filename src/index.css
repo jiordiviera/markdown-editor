@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -87,7 +87,8 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: "JetBrains Mono", monospace;
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
   }
 }
 
@@ -107,6 +108,9 @@
   
   .markdown-body {
     @apply text-foreground leading-relaxed;
+  }
+  .font-mono{
+    fo
   }
   
   .markdown-body h1 {
