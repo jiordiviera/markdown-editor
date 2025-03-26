@@ -12,7 +12,7 @@ const Index = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const resizerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const [isResizing, setIsResizing] = useState(false);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
   const [view, setView] = useState<"both" | "editor" | "preview">("both");
 
   useEffect(() => {
