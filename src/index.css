@@ -109,8 +109,10 @@
   .markdown-body {
     @apply text-foreground leading-relaxed;
   }
-  .font-mono{
-    fo
+  .font-mono {
+    font-family: "JetBrains Mono", monospace;
+    font-optical-sizing: auto;
+    font-style: normal;
   }
   
   .markdown-body h1 {
