@@ -29,14 +29,14 @@ greet('World');
 
 ## Links and Images
 
-[Visit GitHub](https://github.com)
+[Visit GitHub](https://github.com/jiordiviera)
 
 ![Sample Image](https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d)
 
 ## Blockquotes
 
 > The best way to predict the future is to invent it.
-> 
+>
 > — Alan Kay
 
 ## Tables
