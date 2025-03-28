@@ -96,101 +96,101 @@
   .glass {
     @apply bg-white/80 backdrop-blur-md border border-white/30 shadow-sm dark:bg-black/40 dark:border-white/10;
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .markdown-body {
     @apply text-foreground leading-relaxed;
   }
-  .font-mono {
-    font-family: "JetBrains Mono", monospace;
+  .font-jetbrains {
+    font-family: "JetBrains Mono", monospace !important;
     font-optical-sizing: auto;
     font-style: normal;
   }
-  
+
   .markdown-body h1 {
     @apply text-3xl font-bold mb-6 mt-10 border-b pb-2 border-border;
   }
-  
+
   .markdown-body h2 {
     @apply text-2xl font-semibold mb-4 mt-8 border-b pb-2 border-border;
   }
-  
+
   .markdown-body h3 {
     @apply text-xl font-semibold mb-3 mt-6;
   }
-  
+
   .markdown-body h4 {
     @apply text-lg font-semibold mb-2 mt-4;
   }
-  
+
   .markdown-body h5, .markdown-body h6 {
     @apply text-base font-semibold mb-2 mt-4;
   }
-  
+
   .markdown-body p {
     @apply mb-4 leading-relaxed;
   }
-  
+
   .markdown-body a {
     @apply text-primary underline decoration-primary/30 hover:decoration-primary transition-all;
   }
-  
+
   .markdown-body ul, .markdown-body ol {
     @apply mb-4 pl-5;
   }
-  
+
   .markdown-body ul {
     @apply list-disc;
   }
-  
+
   .markdown-body ol {
     @apply list-decimal;
   }
-  
+
   .markdown-body li {
     @apply mb-1;
   }
-  
+
   .markdown-body blockquote {
     @apply pl-4 border-l-4 border-muted italic text-muted-foreground my-4;
   }
-  
+
   .markdown-body code {
-    @apply bg-muted px-1 py-0.5 rounded text-sm font-mono;
+    @apply bg-muted px-1 py-0.5 rounded text-sm font-jetbrains;
   }
-  
+
   .markdown-body pre {
     @apply bg-muted p-4 rounded-md overflow-x-auto mb-4;
   }
-  
+
   .markdown-body pre code {
     @apply bg-transparent p-0 text-sm;
   }
-  
+
   .markdown-body img {
     @apply max-w-full rounded-md my-4;
   }
-  
+
   .markdown-body table {
     @apply w-full border-collapse mb-4;
   }
-  
+
   .markdown-body table th, .markdown-body table td {
     @apply border border-border p-2 text-left;
   }
-  
+
   .markdown-body table th {
     @apply bg-muted font-semibold;
   }
-  
+
   .markdown-body hr {
     @apply my-6 border-t border-border;
   }
