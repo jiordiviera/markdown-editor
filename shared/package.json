@@ -1,0 +1,9 @@
+{
+  "name": "markdown-editor-shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities",
+  "main": "index.ts",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
