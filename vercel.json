@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd client && pnpm install && pnpm run build",
+  "buildCommand": "cd api && pnpm install && (pnpm db:migrate || true) && pnpm db:generate && cd ../client && pnpm install && pnpm run build",
   "outputDirectory": "client/dist",
   "installCommand": "pnpm install --prefix client && pnpm install --prefix api",
   "rewrites": [
