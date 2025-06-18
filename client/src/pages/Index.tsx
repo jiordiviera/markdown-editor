@@ -1,209 +1,190 @@
-
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { PanelLeftOpen, PanelLeftClose, Eye, Edit } from "lucide-react";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import MarkdownPreview from "@/components/MarkdownPreview";
 import Header from "@/components/Header";
 import DocumentSidebar from "@/components/DocumentSidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useDocuments } from "@/hooks/useDocuments";
-import { Button } from "@/components/ui/button";
-import { FileText, Save } from "lucide-react";
-import { toast } from "sonner";
 import { useDebounce } from "@/hooks/useDebounce";
 
 const Index = () => {
-  const { currentDocument, updateDocument, createDocument } = useDocuments();
-  const [markdown, setMarkdown] = useState("");
-  const [splitPosition, setSplitPosition] = useState(50);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const resizerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
-  const [isResizing, setIsResizing] = useState<boolean>(false);
-  const [view, setView] = useState<"both" | "editor" | "preview">("both");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileView, setMobileView] = useState<'editor' | 'preview'>('editor');
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Debounce pour la sauvegarde automatique
+  const { 
+    markdown, 
+    setMarkdown, 
+    isUnsaved, 
+    saveCurrentDocument, 
+    currentDocument 
+  } = useDocuments();
+
   const debouncedMarkdown = useDebounce(markdown, 2000);
 
-  // Charger le document actuel
+  // Gestion responsive
   useEffect(() => {
-    if (currentDocument) {
-      setMarkdown(currentDocument.content);
-      setHasUnsavedChanges(false);
-    } else {
-      // Si aucun document, proposer d'en créer un
-      setMarkdown("# Bienvenue dans Markdown Editor\n\nCréez votre premier document pour commencer !");
-    }
-  }, [currentDocument]);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Sauvegarde automatique
   useEffect(() => {
-    if (currentDocument && debouncedMarkdown !== currentDocument.content && debouncedMarkdown) {
-      updateDocument(currentDocument.id, { content: debouncedMarkdown });
-      setHasUnsavedChanges(false);
+    if (currentDocument && isUnsaved && debouncedMarkdown) {
+      saveCurrentDocument();
     }
-  }, [debouncedMarkdown, currentDocument, updateDocument]);
+  }, [debouncedMarkdown, currentDocument, isUnsaved, saveCurrentDocument]);
 
-  // Gérer les changements de markdown
-  const handleMarkdownChange = (value: string) => {
-    setMarkdown(value);
-    if (currentDocument && value !== currentDocument.content) {
-      setHasUnsavedChanges(true);
+  const handleSave = useCallback(() => {
+    if (currentDocument && isUnsaved) {
+      saveCurrentDocument();
     }
-  };
+  }, [currentDocument, isUnsaved, saveCurrentDocument]);
 
-  // Vue mobile
-  useEffect(() => {
-    if (isMobile && view === "both") {
-      setView("editor");
-    }
-  }, [isMobile, view]);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Redimensionnement
-  const startResize = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
+  
+  const EditorView = () => (
+    <div className="h-full transition-all duration-300 ease-in-out"
+    >
+      <MarkdownEditor 
+        value={markdown} 
+        onChange={setMarkdown}
+      />
+    </div>
+  );
 
-    const onMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      
-      const containerWidth = containerRef.current.clientWidth;
-      const newPosition = (e.clientX / containerWidth) * 100;
-      
-      if (newPosition > 20 && newPosition < 80) {
-        setSplitPosition(newPosition);
-      }
-    };
+  /**
+   * 
+   *  <div
+        style={{
+          width: isMobile
+            ? view === "editor"
+              ? "100%"
+              : "0"
+            : `${splitPosition}%`,
+          display: isMobile && view !== "editor" ? "none" : "block",
+        }}
+        className="h-full transition-all duration-300 ease-in-out"
+      >
+        <MarkdownEditor value={markdown} onChange={handleMarkdownChange} />
+      </div>
 
-    const onMouseUp = () => {
-      setIsResizing(false);
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
+      {!isMobile && (
+        <div
+          ref={resizerRef}
+          className="resizer h-full"
+          onMouseDown={startResize}
+        />
+      )}
+   */
 
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-  };
+  const PreviewView = () => (
+    <div className="flex-1 flex flex-col">
+      <MarkdownPreview 
+        markdown={markdown}
+      />
+    </div>
+  );
 
-  // Créer un nouveau document rapidement
-  const handleCreateNewDocument = async () => {
-    const title = `Document ${new Date().toLocaleDateString('fr-FR')}`;
-    await createDocument({
-      title,
-      content: `# ${title}\n\nCommencez à écrire votre markdown ici...`,
-      isPublic: false
-    });
-  };
-
-  // Sauvegarder manuellement
-  const handleSave = async () => {
-    if (currentDocument && hasUnsavedChanges) {
-      await updateDocument(currentDocument.id, { content: markdown });
-      setHasUnsavedChanges(false);
-      toast.success("Document sauvegardé !");
-    }
-  };
-
-  return (
-    <div className="flex h-screen w-screen overflow-hidden">
-      {/* Sidebar */}
+  const DesktopLayout = () => (
+    <div className="flex h-screen bg-background">
       <DocumentSidebar 
-        isCollapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        isCollapsed={!sidebarOpen} 
+        onToggle={toggleSidebar} 
       />
       
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Header 
-          markdown={markdown} 
-          documentTitle={currentDocument?.title}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSave={handleSave}
-        />
+      <div className="flex-1 flex flex-col">
+        <Header onSave={handleSave} />
         
-        {/* Mobile View Toggle */}
-        <div className="flex items-center justify-center h-12 bg-background border-b border-border gap-2 sm:hidden">
-          <Button
-            onClick={() => setView("editor")}
-            className={`px-4 py-1 rounded-md transition-all ${view === "editor" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
-          >
-            Editor
-          </Button>
-          <Button
-            onClick={() => setView("preview")}
-            className={`px-4 py-1 rounded-md transition-all ${view === "preview" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
-          >
-            Preview
-          </Button>
+        <div className="flex-1 flex">
+          <div className="flex-1 border-r border-border">
+            <EditorView />
+          </div>
+          <div className="flex-1">
+            <PreviewView />
+          </div>
         </div>
-        
-        {/* Editor Area */}
-        {!currentDocument ? (
-          <div className="flex-1 flex items-center justify-center bg-background">
-            <div className="text-center max-w-md mx-auto p-8">
-              <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-2">Bienvenue !</h2>
-              <p className="text-muted-foreground mb-6">
-                Créez votre premier document markdown pour commencer à écrire.
-              </p>
-              <Button onClick={handleCreateNewDocument} size="lg">
-                <FileText className="mr-2 h-5 w-5" />
-                Créer un document
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div 
-            ref={containerRef}
-            className={`flex flex-1 overflow-hidden ${isResizing ? "select-none" : ""}`}
-          >
-            {/* Editor Panel */}
-            <div 
-              style={{ 
-                width: isMobile
-                  ? view === "editor" 
-                    ? "100%" 
-                    : "0"
-                  : `${splitPosition}%`,
-                display: (isMobile && view !== "editor") ? "none" : "block"
-              }}
-              className="h-full transition-all duration-300 ease-in-out"
-            >
-              <MarkdownEditor 
-                value={markdown} 
-                onChange={handleMarkdownChange} 
-              />
-            </div>
-            
-            {/* Resizer */}
-            {!isMobile && (
-              <div 
-                ref={resizerRef}
-                className="resizer h-full"
-                onMouseDown={startResize}
-              />
-            )}
-            
-            {/* Preview Panel */}
-            <div 
-              style={{ 
-                width: isMobile
-                  ? view === "preview" 
-                    ? "100%" 
-                    : "0"
-                  : `calc(${100 - splitPosition}%)`,
-                display: (isMobile && view !== "preview") ? "none" : "block"
-              }}
-              className="h-full transition-all duration-300 ease-in-out bg-background"
-            >
-              <MarkdownPreview markdown={markdown} />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
+
+  const MobileLayout = () => (
+    <div className="flex h-screen bg-background flex-col">
+      <Header onSave={handleSave} />
+      
+      <div className="flex-1 flex flex-col">
+        {/* Mobile Controls */}
+        <div className="flex items-center justify-between p-2 border-b border-border bg-background">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="flex items-center gap-2"
+          >
+            {sidebarOpen ? (
+              <>
+                <PanelLeftClose className="h-4 w-4" />
+                Fermer
+              </>
+            ) : (
+              <>
+                <PanelLeftOpen className="h-4 w-4" />
+                Documents
+              </>
+            )}
+          </Button>
+          
+          <div className="flex bg-muted rounded-lg p-1">
+            <Button
+              variant={mobileView === 'editor' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setMobileView('editor')}
+              className="text-xs"
+            >
+              <Edit className="h-3 w-3 mr-1" />
+              Éditer
+            </Button>
+            <Button
+              variant={mobileView === 'preview' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setMobileView('preview')}
+              className="text-xs"
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              Aperçu
+            </Button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 flex">
+          {/* Sidebar */}
+          {sidebarOpen && (
+            <div className="w-80 border-r border-border">
+              <DocumentSidebar 
+                isCollapsed={false} 
+                onToggle={toggleSidebar} 
+              />
+            </div>
+          )}
+          
+          {/* Main Content */}
+          <div className="flex-1">
+            {mobileView === 'editor' ? <EditorView /> : <PreviewView />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return isMobile ? <MobileLayout /> : <DesktopLayout />;
 };
 
 export default Index;

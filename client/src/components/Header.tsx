@@ -1,9 +1,11 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Moon, Sun, LogOut, User, Save, FileDown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Copy, Download, LogOut, User, Save, FileDown } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useDocuments } from "@/hooks/useDocuments";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import ExportModal from "@/components/ExportModal";
 import {
   DropdownMenu,
@@ -15,40 +17,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
-  markdown: string;
-  documentTitle?: string;
-  hasUnsavedChanges?: boolean;
   onSave?: () => void;
+  isUnsaved?: boolean;
+  hasCurrentDocument?: boolean;
+  currentDocument?: any;
 }
 
-const Header = ({ markdown, documentTitle, hasUnsavedChanges, onSave }: HeaderProps) => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+const Header = ({ onSave }: HeaderProps) => {
   const { user, logout } = useAuth();
+  const { 
+    markdown, 
+    currentDocument, 
+    isUnsaved, 
+    saveCurrentDocument 
+  } = useDocuments();
   const [showExportModal, setShowExportModal] = useState(false);
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(markdown);
-    toast.success("Copied to clipboard");
+    toast.success("Copié dans le presse-papier");
   };
 
   const downloadMarkdown = () => {
-    if (!documentTitle) {
+    if (!currentDocument) {
       toast.error("Aucun document sélectionné");
       return;
     }
@@ -57,7 +48,7 @@ const Header = ({ markdown, documentTitle, hasUnsavedChanges, onSave }: HeaderPr
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+    a.download = `${currentDocument.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -66,31 +57,39 @@ const Header = ({ markdown, documentTitle, hasUnsavedChanges, onSave }: HeaderPr
   };
 
   const handleExport = () => {
-    if (!documentTitle || !markdown) {
+    if (!currentDocument || !markdown) {
       toast.error("Aucun document à exporter");
       return;
     }
     setShowExportModal(true);
   };
 
+  const handleSave = () => {
+    if (onSave) {
+      onSave();
+    } else {
+      saveCurrentDocument();
+    }
+  };
+
   return (
     <header className="w-full h-16 flex items-center justify-between px-6 border-b border-border bg-background glass animate-slide-in">
       <div className="flex items-center space-x-2">
         <h1 className="text-xl font-semibold">
-          {documentTitle || "Markdown Editor"}
+          {currentDocument?.title || "Markdown Editor"}
         </h1>
-        {hasUnsavedChanges && (
+        {isUnsaved && (
           <span className="text-xs text-orange-500 bg-orange-100 dark:bg-orange-900/20 px-2 py-1 rounded">
             Non sauvegardé
           </span>
         )}
       </div>
       <div className="flex items-center space-x-2">
-        {hasUnsavedChanges && onSave && (
+        {isUnsaved && currentDocument && (
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={onSave}
+            onClick={handleSave}
             className="rounded-full transition-all hover:bg-accent"
             title="Sauvegarder"
           >
@@ -102,41 +101,34 @@ const Header = ({ markdown, documentTitle, hasUnsavedChanges, onSave }: HeaderPr
           size="icon" 
           onClick={copyToClipboard}
           className="rounded-full transition-all hover:bg-accent"
-          title="Copy to clipboard"
+          title="Copier dans le presse-papier"
         >
           <Copy className="h-5 w-5" />
         </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={downloadMarkdown}
-          className="rounded-full transition-all hover:bg-accent"
-          title="Télécharger markdown"
-        >
-          <Download className="h-5 w-5" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleExport}
-          className="rounded-full transition-all hover:bg-accent"
-          title="Exporter le document"
-        >
-          <FileDown className="h-5 w-5" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleTheme}
-          className="rounded-full transition-all hover:bg-accent"
-          title="Toggle theme"
-        >
-          {theme === "light" ? (
-            <Moon className="h-5 w-5" />
-          ) : (
-            <Sun className="h-5 w-5" />
-          )}
-        </Button>
+        {currentDocument && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={downloadMarkdown}
+            className="rounded-full transition-all hover:bg-accent"
+            title="Télécharger markdown"
+          >
+            <Download className="h-5 w-5" />
+          </Button>
+        )}
+        {currentDocument && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleExport}
+            className="rounded-full transition-all hover:bg-accent"
+            title="Exporter le document"
+          >
+            <FileDown className="h-5 w-5" />
+          </Button>
+        )}
+        
+        <ThemeToggle />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -161,7 +153,7 @@ const Header = ({ markdown, documentTitle, hasUnsavedChanges, onSave }: HeaderPr
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
-        title={documentTitle || "Document"}
+        title={currentDocument?.title || "Document"}
         content={markdown}
       />
     </header>
