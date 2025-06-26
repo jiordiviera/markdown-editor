@@ -13,13 +13,12 @@ const MarkdownEditor = ({ value, onChange }: MarkdownEditorProps) => {
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
-    
+
     // Focus the editor
     editor.focus();
   };
 
   useEffect(() => {
-    // Apply custom styles to the editor
     const styleElement = document.createElement("style");
     styleElement.textContent = `
       .monaco-editor .margin {
@@ -28,41 +27,45 @@ const MarkdownEditor = ({ value, onChange }: MarkdownEditorProps) => {
       .monaco-editor, .monaco-editor-background {
         background-color: transparent !important;
       }
+      .editor-toolbar {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .editor-container.fullscreen {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: var(--background) !important;
+      }
     `;
     document.head.appendChild(styleElement);
     
     return () => {
-      document.head.removeChild(styleElement);
+      if (document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
     };
   }, []);
 
+
+
   return (
-    <div className="w-full h-full overflow-hidden bg-editor-bg rounded-md animate-fade-in">
-      <Editor
-        height="100%"
-        defaultLanguage="markdown"
-        value={value}
-        onChange={(value) => onChange(value || "")}
-        onMount={handleEditorDidMount}
-        options={{
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          wordWrap: "on",
-          lineNumbers: "on",
-          renderLineHighlight: "none",
-          fontSize: 14,
-          fontFamily: 'JetBrains Mono, monospace',
-          padding: { top: 16, bottom: 16 },
-          scrollbar: {
-            vertical: "visible",
-            horizontal: "visible",
-            useShadows: false,
-            verticalScrollbarSize: 8,
-            horizontalScrollbarSize: 8
-          }
-        }}
-        theme="vs-dark"
-      />
+    <div
+      className={`editor-container w-full h-full flex flex-col bg-background border border-border rounded-lg overflow-hidden shadow-lg `}
+    >
+      <div className="flex-1 overflow-hidden">
+        <Editor
+          height="100%"
+          defaultLanguage="markdown"
+          value={value}
+          onChange={(value) => onChange(value || "")}
+          onMount={handleEditorDidMount}
+          theme={"vs-dark"}
+        />
+      </div>
     </div>
   );
 };

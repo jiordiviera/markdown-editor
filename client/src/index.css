@@ -446,9 +446,15 @@ layer(base);
   background-color: hsl(var(--background) / 0.95);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar améliorée */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -464,17 +470,193 @@ layer(base);
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
+.scrollbar-thin::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Sidebar resize handle */
 .resize-handle {
   width: 4px;
   background: transparent;
   cursor: col-resize;
   transition: background-color 0.2s;
+  position: relative;
 }
 
 .resize-handle:hover,
 .resize-handle.active {
   background: hsl(var(--primary) / 0.5);
+}
+
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  right: -2px;
+  bottom: 0;
+  background: transparent;
+}
+
+/* Animations améliorées */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-full {
+    width: 100% !important;
+  }
+  
+  .mobile-padding {
+    padding: 0.75rem !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-hidden {
+    display: none !important;
+  }
+  
+  .tablet-compact {
+    padding: 0.5rem !important;
+  }
+}
+
+/* Monaco Editor customizations */
+.monaco-editor .margin {
+  background-color: transparent !important;
+}
+
+.monaco-editor, 
+.monaco-editor-background,
+.monaco-editor .inputarea.ime-input {
+  background-color: transparent !important;
+}
+
+.monaco-editor .view-lines {
+  background-color: transparent !important;
+}
+
+/* Backdrop blur for overlays */
+.backdrop-blur-custom {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Focus styles améliorés */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
+}
+
+/* Text selection */
+::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+::-moz-selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* Loading states */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Button hover effects améliorés */
+.btn-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.15);
+}
+
+/* Card shadows */
+.card-shadow {
+  box-shadow: 
+    0 1px 3px 0 hsl(var(--foreground) / 0.1),
+    0 1px 2px 0 hsl(var(--foreground) / 0.06);
+}
+
+.card-shadow-lg {
+  box-shadow: 
+    0 10px 15px -3px hsl(var(--foreground) / 0.1),
+    0 4px 6px -2px hsl(var(--foreground) / 0.05);
+}
+
+/* Safe areas pour mobile */
+@supports (padding: max(0px)) {
+  .safe-area-inset {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  
+  .safe-area-top {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
 }
 
 /* Prose styles for markdown content */
@@ -498,9 +680,9 @@ layer(base);
   font-weight: 600;
 }
 
-.prose code {
+code {
   color: hsl(var(--foreground));
-  background-color: hsl(var(--muted));
+  background-color: hsl(var(--muted)) !important;
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-size: 0.875em;
@@ -598,8 +780,8 @@ layer(base);
   color: hsl(var(--foreground));
 }
 
-.dark .prose code {
-  background-color: hsl(var(--muted));
+.dark code {
+  background-color: hsl(var(--muted)) !important;
   color: hsl(var(--foreground));
 }
 
