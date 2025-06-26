@@ -6,6 +6,7 @@ Un éditeur de markdown moderne avec authentification utilisateur et sauvegarde 
 ## 🚀 Fonctionnalités
 
 ### ✨ Éditeur
+
 - **Éditeur Monaco** (même moteur que VS Code)
 - **Prévisualisation live** côte à côte  
 - **Syntax highlighting** pour les blocs de code
@@ -14,11 +15,13 @@ Un éditeur de markdown moderne avec authentification utilisateur et sauvegarde 
 - **Thème sombre/clair**
 
 ### 👤 Authentification
+
 - **Inscription/Connexion** sécurisée
 - **JWT tokens** pour l'authentification
 - **Hash des mots de passe** avec bcrypt
 
 ### 💾 Gestion des documents
+
 - **Sauvegarde** automatique en PostgreSQL
 - **Création/Édition/Suppression** de documents
 - **Documents publics** partageables
@@ -37,40 +40,47 @@ markdown-editor/
 ## 🛠️ Installation
 
 ### Prérequis
+
 - **Node.js** 18+ et pnpm/ppnpm
 - **Docker** et Docker Compose
 - **Git**
 
 ### 1. Clone le projet
+
 ```bash
 git clone https://github.com/jiordiviera/markdown-editor
 cd markdown-editor
 ```
 
 ### 2. Démarrer PostgreSQL
+
 ```bash
 docker-compose up -d
 ```
 
 ### 3. Installer les dépendances
+
 ```bash
 pnpm run install:all
 ```
 
 ### 4. Setup de la base de données
+
 ```bash
 pnpm run db:setup
 ```
 
 ### 5. Démarrer le développement
+
 ```bash
 pnpm run dev
 ```
 
 L'application sera disponible sur :
-- **Frontend** : http://localhost:5173
-- **Backend API** : http://localhost:3001
-- **Adminer (DB admin)** : http://localhost:8080
+
+- **Frontend** : <http://localhost:5173>
+- **Backend API** : <http://localhost:3001>
+- **Adminer (DB admin)** : <http://localhost:8080>
 
 ## 📱 Utilisation
 
@@ -102,10 +112,12 @@ pnpm run db:studio          # Interface Prisma Studio
 ## 🌐 API Endpoints
 
 ### Auth
+
 - `POST /api/auth/register` - Inscription
 - `POST /api/auth/login` - Connexion
 
 ### Documents
+
 - `GET /api/documents` - Liste des documents
 - `GET /api/documents/:id` - Récupérer un document
 - `POST /api/documents` - Créer un document
@@ -129,6 +141,7 @@ FRONTEND_URL="https://yourdomain.com"
 ```
 
 ### Docker
+
 ```bash
 # Build les images
 docker-compose -f docker-compose.prod.yml build
